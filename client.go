@@ -94,6 +94,7 @@ func (c *Client) GetAccount(ctx context.Context, owner common.Address, salt *big
 	return addr, nil
 }
 
+// GetAccountBalance returns the balance of the given account.
 func (c *Client) GetAccountBalance(ctx context.Context, account common.Address) (*big.Int, error) {
 	balance, err := c.eth.BalanceAt(ctx, account, nil)
 	if err != nil {
@@ -102,7 +103,8 @@ func (c *Client) GetAccountBalance(ctx context.Context, account common.Address) 
 	return balance, nil
 }
 
-func (c *Client) fillAndSign(ctx context.Context, userOp *UserOperation, signer *ecdsa.PrivateKey) (*UserOperation, common.Hash, error) {
+// FillAndSign fills the user operation with default values and signs it.
+func (c *Client) FillAndSign(ctx context.Context, userOp *UserOperation, signer *ecdsa.PrivateKey) (*UserOperation, common.Hash, error) {
 	if userOp.Sender == (common.Address{}) {
 		return nil, common.Hash{}, fmt.Errorf("sender address is empty")
 	}
@@ -114,7 +116,7 @@ func (c *Client) fillAndSign(ctx context.Context, userOp *UserOperation, signer 
 		userOp.Nonce = nonce
 	}
 
-	initCode, data, err := c.GetAccountInitCode(ctx, userOp.Sender, crypto.PubkeyToAddress(signer.PublicKey), userOp.Salt)
+	initCode, data, err := c.getInitCodeData(ctx, userOp.Sender, crypto.PubkeyToAddress(signer.PublicKey), userOp.Salt)
 	if err != nil {
 		return nil, common.Hash{}, fmt.Errorf("error getting account init code: %v", err)
 	}
@@ -186,7 +188,7 @@ func (c *Client) SignUserOp(packed *entrypoint.PackedUserOperation, privateKey *
 	return sig, hash, nil
 }
 
-func (c *Client) GetAccountInitCode(ctx context.Context, account common.Address, owner common.Address, salt *big.Int) ([]byte, []byte, error) {
+func (c *Client) getInitCodeData(ctx context.Context, account common.Address, owner common.Address, salt *big.Int) ([]byte, []byte, error) {
 	isDeployed, err := IsAccountDeployed(ctx, c.eth, account)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error checking if account is deployed: %v", err)
@@ -279,13 +281,17 @@ func (c *Client) DeployAccount(ctx context.Context, signer *ecdsa.PrivateKey, ac
 	return bind.WaitMined(ctx, c.eth, tx)
 }
 
+// ChainId returns the chain ID of the node.
 func (c *Client) ChainId() *big.Int {
 	return c.chainId
 }
 
+// FactoryABI returns the ABI of the account factory.
 func (c *Client) FactoryABI() *abi.ABI {
 	return c.simpleFactoryABI
 }
+
+// ACcountABI returns the ABI of the account contract.
 func (c *Client) AccountABI() *abi.ABI {
 	return c.simpleAccountABI
 }

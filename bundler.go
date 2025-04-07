@@ -95,7 +95,7 @@ func (c *Client) SupportedEntryPoints(ctx context.Context) ([]common.Address, er
 }
 
 func (c *Client) SendUserOp(ctx context.Context, userOp *UserOperation, signer *ecdsa.PrivateKey) (common.Hash, error) {
-	signed, hash, err := c.fillAndSign(ctx, userOp, signer)
+	signed, hash, err := c.FillAndSign(ctx, userOp, signer)
 	if err != nil {
 		return hash, fmt.Errorf("error fill and sign userop: %v", err)
 	}
@@ -116,7 +116,7 @@ func (c *Client) SendUserOp(ctx context.Context, userOp *UserOperation, signer *
 }
 
 func (c *Client) GetUserOpHash(ctx context.Context, userOp *UserOperation, signer *ecdsa.PrivateKey) (common.Hash, error) {
-	_, hash, err := c.fillAndSign(ctx, userOp, signer)
+	_, hash, err := c.FillAndSign(ctx, userOp, signer)
 	if err != nil {
 		return common.Hash{}, fmt.Errorf("error fill and sign userop: %v", err)
 	}

@@ -129,40 +129,42 @@ func (c *Client) FillAndSign(ctx context.Context, userOp *UserOperation, signer 
 		userOp.InitCode = []byte{}
 	}
 
-	// Using paymaster default validation time
-	validAfter := big.NewInt(0)
-	validUntil := big.NewInt(math.MaxInt32)
+	if c.config.PaymasterAddress != nil {
+		// Using paymaster default validation time
+		validAfter := big.NewInt(0)
+		validUntil := big.NewInt(math.MaxInt32)
 
-	paymasterData, err := EncodePaymasterData(validUntil, validAfter, EmptySignature)
-	if err != nil {
-		return nil, common.Hash{}, fmt.Errorf("error encoding paymaster data: %v", err)
-	}
+		paymasterData, err := EncodePaymasterData(validUntil, validAfter, EmptySignature)
+		if err != nil {
+			return nil, common.Hash{}, fmt.Errorf("error encoding paymaster data: %v", err)
+		}
 
-	userOp.Paymaster = c.config.PaymasterAddress
+		userOp.Paymaster = *c.config.PaymasterAddress
 
-	paymasterHash, err := GetPaymasterHash(&entrypoint.PackedUserOperation{
-		Sender:             userOp.Sender,
-		Nonce:              userOp.Nonce,
-		InitCode:           userOp.InitCode,
-		CallData:           userOp.CallData,
-		AccountGasLimits:   PackInt(userOp.VerificationGasLimit, userOp.CallGasLimit),
-		PreVerificationGas: userOp.PreVerificationGas,
-		GasFees:            PackInt(userOp.MaxPriorityFeePerGas, userOp.MaxFeePerGas),
-		PaymasterAndData:   PackPaymasterAndData(userOp.Paymaster, userOp.PaymasterVerificationGasLimit, userOp.PaymasterPostOpGasLimit, paymasterData),
-		Signature:          []byte{},
-	}, c.chainId, validUntil, validAfter)
-	if err != nil {
-		return nil, common.Hash{}, fmt.Errorf("error getting paymaster data: %v", err)
+		paymasterHash, err := GetPaymasterHash(&entrypoint.PackedUserOperation{
+			Sender:             userOp.Sender,
+			Nonce:              userOp.Nonce,
+			InitCode:           userOp.InitCode,
+			CallData:           userOp.CallData,
+			AccountGasLimits:   PackInt(userOp.VerificationGasLimit, userOp.CallGasLimit),
+			PreVerificationGas: userOp.PreVerificationGas,
+			GasFees:            PackInt(userOp.MaxPriorityFeePerGas, userOp.MaxFeePerGas),
+			PaymasterAndData:   PackPaymasterAndData(userOp.Paymaster, userOp.PaymasterVerificationGasLimit, userOp.PaymasterPostOpGasLimit, paymasterData),
+			Signature:          []byte{},
+		}, c.chainId, validUntil, validAfter)
+		if err != nil {
+			return nil, common.Hash{}, fmt.Errorf("error getting paymaster data: %v", err)
+		}
+		paymasterSig, err := SignMessage(c.config.VerifyingSigner, paymasterHash.Bytes())
+		if err != nil {
+			return nil, common.Hash{}, fmt.Errorf("error signing paymaster data: %v", err)
+		}
+		paymasterData, err = EncodePaymasterData(validUntil, validAfter, paymasterSig)
+		if err != nil {
+			return nil, common.Hash{}, fmt.Errorf("error encoding paymaster data: %v", err)
+		}
+		userOp.PaymasterData = paymasterData
 	}
-	paymasterSig, err := SignMessage(c.config.VerifyingSigner, paymasterHash.Bytes())
-	if err != nil {
-		return nil, common.Hash{}, fmt.Errorf("error signing paymaster data: %v", err)
-	}
-	paymasterData, err = EncodePaymasterData(validUntil, validAfter, paymasterSig)
-	if err != nil {
-		return nil, common.Hash{}, fmt.Errorf("error encoding paymaster data: %v", err)
-	}
-	userOp.PaymasterData = paymasterData
 
 	packed := PackUserOperation(userOp)
 

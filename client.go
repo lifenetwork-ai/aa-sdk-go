@@ -291,7 +291,12 @@ func (c *Client) FactoryABI() *abi.ABI {
 	return c.simpleFactoryABI
 }
 
-// ACcountABI returns the ABI of the account contract.
+// AccountABI returns the ABI of the account contract.
 func (c *Client) AccountABI() *abi.ABI {
 	return c.simpleAccountABI
+}
+
+// EthClient returns the eth client.
+func (c *Client) EthClient() *ethclient.Client {
+	return c.eth
 }

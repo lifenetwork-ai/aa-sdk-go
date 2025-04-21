@@ -41,13 +41,14 @@ func main() {
 		log.Fatalf("Failed to parse executor key: %v", err)
 	}
 
+	paymasterAddress := common.HexToAddress("0xe7db0C105Ac75A493B0413046417e48594360542")
 	config := &aasdk.Config{
 		NodeUrl:             "https://testnet-lifeaiv1-c648f.avax-test.network/ext/bc/62fkxYTWbGBfXoHNXcGJbq2dTXba2uoCFySzdHy87iovJj2F4/rpc?token=25e957a027b09bb006da7e9fc981100ce25f333cd998a76eb36a842fcb5ba63a",
 		BundlerUrl:          "http://34.126.118.65:8080/rpc",
 		WaitReceiptInterval: 2 * time.Second,
 		Entrypoint:          common.HexToAddress("0xd308aE59cb31932E8D9305BAda32Fa782d3D5d42"),
 		AccountFactory:      common.HexToAddress("0xD421D8470b577f6A64992132D04906EfE51F1dE3"),
-		PaymasterAddress:    common.HexToAddress("0xe7db0C105Ac75A493B0413046417e48594360542"),
+		PaymasterAddress:    &paymasterAddress,
 		VerifyingSigner:     verifyingSigner, // optional, only used for verifying paymaster data
 		ExecutorSigner:      executorSigner,  // optional, only used for sending atomic transactions
 	}

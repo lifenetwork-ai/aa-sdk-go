@@ -34,7 +34,7 @@ type Config struct {
 	// The simple account factory address.
 	AccountFactory common.Address
 	// The verifying paymaster address.
-	PaymasterAddress common.Address
+	PaymasterAddress *common.Address
 	// The account verifying Paymaster requests.
 	VerifyingSigner *ecdsa.PrivateKey
 	// The account that will sign the user operation.

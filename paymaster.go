@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/genefriendway/aa-sdk-go/bindings/entrypoint"
+	"github.com/lifenetwork-ai/aa-sdk-go/bindings/entrypoint"
 )
 
 const (

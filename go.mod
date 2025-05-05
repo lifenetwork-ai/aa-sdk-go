@@ -1,4 +1,4 @@
-module github.com/genefriendway/aa-sdk-go
+module github.com/lifenetwork-ai/aa-sdk-go
 
 go 1.24.1
 

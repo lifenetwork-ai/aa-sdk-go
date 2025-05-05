@@ -10,7 +10,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	aasdk "github.com/genefriendway/aa-sdk-go"
+	aasdk "github.com/lifenetwork-ai/aa-sdk-go"
 )
 
 const (

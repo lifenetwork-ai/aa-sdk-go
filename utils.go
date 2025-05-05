@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/genefriendway/aa-sdk-go/bindings/entrypoint"
+	"github.com/lifenetwork-ai/aa-sdk-go/bindings/entrypoint"
 )
 
 // IsAccountDeployed checks if the account is deployed by querying its bytecode

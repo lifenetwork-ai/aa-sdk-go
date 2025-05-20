@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"log"
 	"log/slog"
 	"math/big"
@@ -48,8 +49,8 @@ func main() {
 		Entrypoint:          common.HexToAddress("0xd308aE59cb31932E8D9305BAda32Fa782d3D5d42"),
 		AccountFactory:      common.HexToAddress("0xD421D8470b577f6A64992132D04906EfE51F1dE3"),
 		PaymasterAddress:    common.HexToAddress("0xe7db0C105Ac75A493B0413046417e48594360542"),
-		VerifyingSigner:     verifyingSigner, // optional, only used for verifying paymaster data
-		ExecutorSigner:      executorSigner,  // optional, only used for sending atomic transactions
+		VerifyingSigner:     verifyingSigner,                                                        // optional, only used for verifying paymaster data
+		ExecutorSigners:     aasdk.NewRoundRobinSignerProvider([]*ecdsa.PrivateKey{executorSigner}), // optional, only used for sending atomic transactions
 	}
 
 	client, err := aasdk.NewClient(config, aasdk.NewLRUCache(10000))

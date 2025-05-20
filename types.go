@@ -39,7 +39,7 @@ type Config struct {
 	VerifyingSigner *ecdsa.PrivateKey
 	// The account that will sign the user operation.
 	// It's needed when call directly to Entrypoint contract.
-	ExecutorSigner *ecdsa.PrivateKey
+	ExecutorSigners Rotator[*ecdsa.PrivateKey]
 }
 
 func NewUserOpWithDefault(sender common.Address, calldata []byte, salt *big.Int) *UserOperation {

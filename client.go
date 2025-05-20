@@ -19,8 +19,10 @@ import (
 	"github.com/lifenetwork-ai/aa-sdk-go/bindings/entrypoint"
 )
 
-var _ Bundler = &Client{}
-var _ BaseAccount = &Client{}
+var (
+	_ Bundler     = &Client{}
+	_ BaseAccount = &Client{}
+)
 
 type Client struct {
 	id               atomic.Uint64 // unique id for the client
@@ -207,15 +209,18 @@ func (c *Client) getInitCodeData(ctx context.Context, account common.Address, ow
 
 // HandleOps handles the user operations by calling the entrypoint contract directly.
 func (c *Client) HandleOps(ctx context.Context, ops []entrypoint.PackedUserOperation) ([]common.Hash, common.Hash, error) {
-	if c.config.ExecutorSigner == nil {
-		panic("executor signer is nil")
+	if c.config.ExecutorSigners.Count() == 0 {
+		panic("no execution signer provided")
 	}
 
-	txOpts, err := bind.NewKeyedTransactorWithChainID(c.config.ExecutorSigner, c.chainId)
+	// Get one signer from the rotation for use
+	executorSigner := c.config.ExecutorSigners.Next()
+
+	txOpts, err := bind.NewKeyedTransactorWithChainID(executorSigner, c.chainId)
 	if err != nil {
 		return []common.Hash{}, common.Hash{}, fmt.Errorf("error creating transaction options: %v", err)
 	}
-	tx, err := c.entrypoint.HandleOps(txOpts, ops, crypto.PubkeyToAddress(c.config.ExecutorSigner.PublicKey))
+	tx, err := c.entrypoint.HandleOps(txOpts, ops, crypto.PubkeyToAddress(executorSigner.PublicKey))
 	if err != nil {
 		return []common.Hash{}, common.Hash{}, fmt.Errorf("error handling ops: %v", err)
 	}
@@ -232,14 +237,18 @@ func (c *Client) HandleOps(ctx context.Context, ops []entrypoint.PackedUserOpera
 
 // HandleAtomicOps handles the user operations with atomic mode by calling the entrypoint contract directly.
 func (c *Client) HandleAtomicOps(ctx context.Context, ops []entrypoint.PackedUserOperation) ([]common.Hash, common.Hash, error) {
-	if c.config.ExecutorSigner == nil {
-		panic("executor signer is nil")
+	if c.config.ExecutorSigners.Count() == 0 {
+		panic("no execution signer provided")
 	}
-	txOpts, err := bind.NewKeyedTransactorWithChainID(c.config.ExecutorSigner, c.chainId)
+
+	// Get one signer from the rotation for use
+	executorSigner := c.config.ExecutorSigners.Next()
+
+	txOpts, err := bind.NewKeyedTransactorWithChainID(executorSigner, c.chainId)
 	if err != nil {
 		return []common.Hash{}, common.Hash{}, fmt.Errorf("error creating transaction options: %v", err)
 	}
-	tx, err := c.entrypoint.HandleAtomicOps(txOpts, ops, crypto.PubkeyToAddress(c.config.ExecutorSigner.PublicKey))
+	tx, err := c.entrypoint.HandleAtomicOps(txOpts, ops, crypto.PubkeyToAddress(executorSigner.PublicKey))
 	if err != nil {
 		return []common.Hash{}, common.Hash{}, fmt.Errorf("error handling atomic ops: %v", err)
 	}
